@@ -41,29 +41,38 @@
  */
 const express = require("express");
 const bodyParser = require("body-parser");
-
+const fs = require("fs").promises;
 const app = express();
 
 app.use(bodyParser.json());
 
-const todos = [
-  {
-    id: 1,
-    title: "Reading book",
-    description: "Read the financial statements book",
-  },
-  {
-    id: 2,
-    title: "Cooking",
-    description: "Cook idli in the morning",
-  },
-];
+function readTodos() {
+  return new Promise(function (resolve) {
+    resolve(
+      fs.readFile("todos.json", "utf8", function (err, data) {
+        if (err) throw err;
+      })
+    );
+  });
+}
 
-app.get("/todos", (req, res) => {
+function writeTodo(data) {
+  return new Promise(function (resolve) {
+    resolve(
+      fs.writeFile("todos.json", data, (err) => {
+        if (err) throw err;
+      })
+    );
+  });
+}
+
+app.get("/todos", async (req, res) => {
+  const todos = JSON.parse(await readTodos());
   res.json(todos);
 });
 
-app.get("/todos/:id", (req, res) => {
+app.get("/todos/:id", async (req, res) => {
+  const todos = JSON.parse(await readTodos());
   const todo = todos.find((t) => t.id === parseInt(req.params.id));
   if (!todo) {
     res.status(404).send("");
@@ -71,38 +80,45 @@ app.get("/todos/:id", (req, res) => {
     res.send(todo);
   }
 });
-app.post("/todos", (req, res) => {
+
+app.post("/todos", async (req, res) => {
   const todo = {
     id: Math.floor(Math.random() * 1000000),
     title: req.body.title,
     description: req.body.description,
   };
+  const todos = JSON.parse(await readTodos());
   todos.push(todo);
+  await writeTodo(JSON.stringify(todos));
   res.status(201).json(todo);
 });
 
-app.put("/todos/:id", (req, res) => {
+app.put("/todos/:id", async (req, res) => {
+  const todos = JSON.parse(await readTodos());
   const todoIdx = todos.findIndex((t) => t.id === parseInt(req.params.id));
   if (todoIdx === -1) {
     res.status(404).send();
   } else {
     todos[todoIdx].title = req.body.title;
     todos[todoIdx].description = req.body.description;
+    await writeTodo(JSON.stringify(todos));
     res.json(todos[todoIdx]);
   }
 });
 
-app.delete('/todos/:id', (req, res) => {
+app.delete("/todos/:id", async (req, res) => {
+  const todos = JSON.parse(await readTodos());
   const todoIdx = todos.findIndex((t) => t.id === parseInt(req.params.id));
   if (todoIdx === -1) {
     res.status(404).send();
   } else {
     todos.splice(todoIdx, 1);
+    await writeTodo(JSON.stringify(todos));
     res.status(200).send("todo deleted");
   }
 });
 
-app.all("*", (req, res) => {
+app.use((req, res, next) => {
   res.status(404).send("Route not found");
 });
 
