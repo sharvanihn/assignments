@@ -1,0 +1,60 @@
+<html>
+  <script>
+    let timeoutVal;
+    function debounceInterestCal() {
+      clearTimeout(timeoutVal);
+      timeoutVal = setTimeout(() => {
+        interestCal();
+      }, 100);
+    }
+
+    async function interestCal() {
+      const principal = parseInt(document.getElementById("principal").value);
+      const rate = parseInt(document.getElementById("rate").value);
+      const time = parseInt(document.getElementById("time").value);
+      const totalreturnElement = document.getElementById("totalreturn");
+      const interestEarnedElement = document.getElementById("interestEarned");
+      const response = await fetch(
+        "http://localhost:3001/interest?principal=" +
+          principal +
+          "&rate=" +
+          rate +
+          "&time=" +
+          time
+      );
+      const ans = await response.json();
+
+      totalreturnElement.innerHTML =
+        "Total amount after " + time + "years is - " + ans.total;
+      interestEarnedElement.innerHTML = "Interest earned is - " + ans.interest;
+    }
+  </script>
+  <body>
+    <input
+      oninput="debounceInterestCal()"
+      id="principal"
+      type="text"
+      placeholder="Principal"
+      value="0"
+    /><br />
+    <br />
+    <input
+      oninput="debounceInterestCal()"
+      id="rate"
+      type="text"
+      placeholder="Rate %"
+      value="0"
+    /><br />
+    <br />
+    <input
+      oninput="debounceInterestCal()"
+      id="time"
+      type="text"
+      placeholder="Time"
+      value="0"
+    /><br />
+    <br />
+    <div id="totalreturn"></div>
+    <div id="interestEarned"></div>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+<html>
+  <script>
+    function populateDiv() {
+      const first = parseInt(document.getElementById("firstNumber").value);
+      const second = parseInt(document.getElementById("secondNumber").value);
+      const element = document.getElementById("finalSum");
+      const result = first + second;
+      element.innerHTML = "Sum of above two number is " + result;
+    }
+  </script>
+  <body>
+    <input id="firstNumber" type="text" placeholder="First Number" /> <br />
+    <br />
+    <input id="secondNumber" type="text" placeholder="Second Number" /> <br />
+    <br />
+    <button onclick="populateDiv()">Calculate Sum</button><br />
+    <br />
+    <div id="finalSum"></div>
+  </body>
+</html>
